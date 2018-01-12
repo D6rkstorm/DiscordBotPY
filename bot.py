@@ -16,7 +16,6 @@ async def help(message):
 
     await client.send_message(message.channel, "```You have executed the help command, see direct messages for more detail```")
     time.sleep(.1)
-    print("sent message to server, now attempting client message")
     await client.send_message(message.author, "This is the help message you requested")
 
 @client.event
@@ -27,10 +26,13 @@ async def on_message(message):
             await help(message)
 
         trusted_users = ["Darkstorm#6481", "EthanSchaffer#7680"]
-        if command == "please kill me" and str(message.author) in trusted_users:
-
-            exit()
-with open('token.txt') as token_file:
+        if command == "please kill yourself":
+            if str(message.author) in trusted_users:
+                await client.send_message(message.channel, "Okay :cry:")
+                exit()
+            else:
+                await client.send_message(message.channel, "Fuck off *THOT*")
+with open('token_file.txt') as token_file:
     for line in token_file:
         login_token = line
 
