@@ -2,9 +2,11 @@ import discord
 import asyncio
 import time
 from random import randint
+import random
 
 client = discord.Client()
 commandStr = "`"
+trusted_users = ["Darkstorm#6481", "EthanSchaffer#7608"]
 
 @client.event
 async def on_ready():
@@ -18,26 +20,19 @@ async def help(message):
     time.sleep(.1)
     await client.send_message(message.author, "```This is the TesterBot Discord Bot, Built for LasaCS Copyright Ethan Schaffer and Gabriel Manners 2018. For additional commands see below```"
                                               """1) Help: Lists basic commands and information about the bot. 
-2) *For specific users* End: Forces the bot to crash by setting 2=1.
-3) Dota: Gives a random hero from the current Dota 2 hero selection pool
-4) Game: Takes up to two players for a rock paper scissors game. Currently in progress.
-5) Echo: Repeats what was said, to an extent
-6) PingMe: Pings the User
-7) Purge: Can mention a user to clear their messages, or leave blank to clear my messages""")
+2) *For specific users* End: Forces the bot to crash by setting 2=1; Only usable by server admins.
+3) Game: Takes up to two players for a rock paper scissors game. Currently in progress.
+4) Echo: Repeats what was said, to an extent
+5) PingMe: Pings the User
+6) Purge: Can mention a user to clear their messages, or leave blank to clear my messages; Only usable by server admins""")
 
 async def end(message):
-    trusted_users = ["Darkstorm#6481", "EthanSchaffer#7680"]
+
     if str(message.author) in trusted_users:
         await client.send_message(message.channel, "Goodnight")
         exit()
     else:
-        await client.send_message(message.channel, "Insufficient permissions, contact D6rkstorm#6481 if you think this is in error")
-
-async def dota(message):
-    x = randint(0,114)
-    mystr = """"Abaddon", "Alchemist", "Ancient Apparition", "Anti-Mage", "Arc Warden", "Axe","Bane", "Batrider", "Beastmaster", "Bloodseeker", "Bounty Hunter", "Brewmaster", "Bristleback", "Broodmother","Centaur Warrunner", "Chaos Knight", "Chen", "Clinkz", "Clockwerk", "Cyrstal Maiden","Dark Seer", "Dark Willow", "Dazzle", "Death Prophet", "Disruptor", "Doom", "Dragon Knight", "Drow Ranger","Earth Spriit", "Earthshaker", "Elder Titan", "Ember Spirit", "Enchantress", "Engima","Faceless Void","Gyrocopter","Huskar","Invoker", "Io","Jakiro", "Juggernaut","Keeper of the Light", "Kunkka","Legion Commander", "Leshrac", "Lich", "Lifestealer", "Lina", "Lion", "Lone Druid", "Luna", "Lycan","Magnus", "Medusa", "Meepo", "Mirana", "Monkey King", "Morphling","Naga Siren", "Natures Prophet", "Necrophos", "Night Stalker", "Nyx Assassin","Ogre Magi", "Omniknight", "Oracle", "Outworld","Pangolier", "Phantom Assassin", "Phantom Lancer", "Pheonix", "Puck", "Pudge", "Pugna","Queen of Pain","Razor", "Riki", "Rubick","Sand King", "Shadow Demon", "Shadow Feind", "Shadow Shaman", "Silencer", "Skywrath Mage", "Slardar", "Slark", "Sniper", "Spectre", "Spirit Breaker", "Storm Spirit", "Sven","Techies", "Templar Assassin", "Terrorblade", "Tidehunter", "Timbersaw", "Tinker", "Tiny", "Treat Protector", "Troll Warlod", "Tusk","Underlord", "Undying", "Ursa","Vengeful Spirit", "Venomancer", "Viper", "Visage","Warlock", "Weaver", "Windragner", "Winter Wyvern", "Witch Doctor", "Wraith King", "Zeus """
-    mylist = mystr.split(",")
-    await client.send_message(message.channel, mylist[x][2:-1])
+        await client.send_message(message.channel, "Insufficient permissions, contact <@!121406882865872901> if you think this is in error")
 
 async def game(message):
     await client.send_message(message.channel, "This doesnt work right now, even though it looks like it will, SORRY!")
@@ -91,7 +86,10 @@ async def quote(message):
 
 async def echo(message):
     if ("`" not in message.content[len(commandStr) + 4:]) and ("@" not in message.content[len(commandStr) + 4:]):
-        await client.send_message(message.channel, message.content[len(commandStr) + 4:])
+        if len(message.content) < 100:
+            await client.send_message(message.channel, message.content[len(commandStr) + 4:])
+        else:
+            await client.send_message(message.channel, "Your echo was too long, please consider downsizing.")
     else:
         await client.send_message(message.channel, "Please try not to loop me or ping people, its just annoying")
 
@@ -99,17 +97,20 @@ async def pingme(message):
     await client.send_message(message.channel, message.author.mention)
 
 async def purge(message):
-    if message.content[len(commandStr):].lower() == "purge":
-        def is_me(message):
-            return message.author == client.user
+    if str(message.author) in trusted_users:
+        if message.content[len(commandStr):].lower() == "purge":
+            def is_me(message):
+                return message.author == client.user
 
-        deleted = await client.purge_from(message.channel, limit=1000, check=is_me)
-        await client.send_message(message.channel, 'Deleted {} message(s)'.format(len(deleted)))
+            deleted = await client.purge_from(message.channel, limit=100, check=is_me)
+            await client.send_message(message.channel, 'Deleted {} message(s)'.format(len(deleted)))
+        else:
+            def is_else(message):
+                return message.content[len(commandStr) + 5:]
+            deleted = await client.purge_from(message.channel, limit=100, check=is_else)
+            await client.send_message(message.channel, 'Deleted {} message(s)'.format(len(deleted)))
     else:
-        def is_else(message):
-            return message.content[len(commandStr) + 5:]
-        deleted = await client.purge_from(message.channel, limit=1000, check=is_else)
-        await client.send_message(message.channel, 'Deleted {} message(s)'.format(len(deleted)))
+        await client.send_message(message.channel, "You dont have permission to purge, please contact <@!121406882865872901> if you think this is in error.")
 
 @client.event
 async def on_message(message):
@@ -119,8 +120,6 @@ async def on_message(message):
             await help(message)
         if command == "end":
             await end(message)
-        if command == "dota":
-            await dota(message)
         if "echo" in command[0:4]:
             await echo(message)
         if command == "quote":
@@ -129,10 +128,14 @@ async def on_message(message):
             await pingme(message)
         if "purge" in command[0:5]:
             await purge(message)
+        if command == "mention":
+            print(message.author.mention)
 
-
-with open('token_file.txt') as token_file:
-    for line in token_file:
-        login_token = line
+#with open('token_file.txt') as token_file:
+    #for line in token_file:
+        #login_token = line
 
 client.run(login_token)
+
+
+#sams mention <@!122022693422891011>
